@@ -1,0 +1,21 @@
+{
+  "name": "google-sheets-translations",
+  "version": "1.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com:dannymarsland/google-sheets-translations.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "google-spreadsheet": "^2.0.3"
+  },
+  "devDependencies": {
+    "async": "^2.0.0-rc.6"
+  }
+}
