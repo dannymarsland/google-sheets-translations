@@ -18,14 +18,14 @@ function WorksheetTranslations(title, translations, locales) {
 
     self.getTranslationsForLocale = function (locale) {
         var localeTranslations = {};
-        Object.keys(self.translations).forEach(function (token) {
+        self.getTokens().forEach(function (token) {
             localeTranslations[token] = self.translations[token][locale];
         });
         return localeTranslations;
     };
 
     self.getTokens = function () {
-        return Object.keys(self.translations);
+        return Object.keys(self.translations).sort();
     };
 
     self.addLocale = function (locale, translations) {
