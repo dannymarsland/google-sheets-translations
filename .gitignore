@@ -1,3 +1,4 @@
 node_modules/
 example/data/*
 !example/data/.gitkeep
+.idea/
