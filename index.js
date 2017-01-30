@@ -48,6 +48,33 @@ function getTranslationsFromWorksheet(worksheet, cb) {
     });
 }
 
+function updateWorksheetTokens(worksheet, tokens, cb) {
+    console.log('Updating translation tokens for : ' + worksheet.title);
+    worksheet.getRows({}, function(err, rows) {
+        if (err) {
+            cb(err)
+        } else {
+            var currentTokens = rows.map(function(row) {
+                return row.token;
+            }).filter(function(token){
+                return token && token.length;
+            });
+            var missingTokens = tokens.filter(function(token) {
+                return currentTokens.indexOf(token) === -1;
+            });
+
+            console.log('Following tokens were missing in the translations spreadsheet: ' + missingTokens.join(','));
+
+            async.eachSeries(missingTokens, function(token, next) {
+                console.log('Adding token: ' + token);
+
+                worksheet.addRow({'token': token}, next);
+            }, cb);
+        }
+    });
+}
+
+
 function isValidLocale(locale) {
     //return locale !== 'id' && /^[a-zA-Z]{2}(_[a-zA-Z]{2})?$/.test(locale);
     return locale !== 'id' && locale !== 'token' && /^[a-zA-Z]+([_-][a-zA-Z]+)?$/.test(locale);
@@ -58,6 +85,19 @@ function updateSpreadsheetWithTranslations(doc, spreadsheetTranslations, cb) {
         addWorksheetTranslations(doc, worksheetTranslations, cb);
     };
     async.eachSeries(spreadsheetTranslations, addTranslations, cb);
+}
+
+function updateSpreadsheetWithTokens(doc, tokens, cb) {
+    doc.getInfo(function(err, info) {
+        if (err) {
+            cb(err);
+        } else {
+            console.log('Loaded doc: ' + info.title);
+            async.map(info.worksheets, function(worksheet, next) {
+                updateWorksheetTokens(worksheet, tokens, next);
+            }, cb);
+        }
+    });
 }
 
 
@@ -111,6 +151,22 @@ module.exports.loadTranslations = function(spreadsheetId, credentials, cb) {
                 cb(error)
             } else {
                 getTranslationsFromSpreadsheet(doc, cb);
+            }
+        });
+    }
+};
+
+module.exports.updateTokens = function(spreadsheetId, tokens, credentials, cb) {
+    var doc = new GoogleSpreadsheet(spreadsheetId);
+    if (typeof credentials === 'function') {
+        cb = credentials;
+        updateSpreadsheetWithTokens(doc, tokens, cb);
+    } else {
+        doc.useServiceAccountAuth(credentials, function(error) {
+            if (error) {
+                cb(error)
+            } else {
+                updateSpreadsheetWithTokens(doc, tokens, cb);
             }
         });
     }
